@@ -5,6 +5,7 @@ sender = "littlecoders10@gmail.com"
 password = "byzf java eptn qokk"
 reciever = "muiznaveedrana@gmail.com"
 def send_email(image_path):
+    print("send email function start")
     email_message = EmailMessage()
     email_message["Subject"] = "Motion Detected VIA Webcam"
     email_message.set_content("Make sure this is safe!")
@@ -18,6 +19,7 @@ def send_email(image_path):
     gmail.login(sender, password)
     gmail.sendmail(sender, reciever, email_message.as_string())
     gmail.quit()
+    print("send email function ended")
 
 if __name__ == "__main__":
     send_email()
