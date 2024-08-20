@@ -1,6 +1,8 @@
 import cv2
 import time
 from emailing import send_email
+import glob
+import os
 
 video = cv2.VideoCapture(0)
 time.sleep(1)
@@ -8,9 +10,17 @@ time.sleep(1)
 status_list = []
 
 first_frame =None
+count = 1
+
+def clean_folder():
+    images = glob.glob('images/*.png')
+    for image in images:
+        os.remove(image)
+
 while True:
     status = 0
     check, frame = video.read()
+    
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray_frame_gua = cv2.GaussianBlur(gray_frame, (21, 21), 0)
     #cv2.imshow("My Video", frame)
@@ -26,19 +36,24 @@ while True:
     contours, check = cv2.findContours(thresh_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     for contour in contours:
-        if cv2.contourArea(contour) < 5000:
+        if cv2.contourArea(contour) < 1000:
             continue
         x, y, w, h = cv2.boundingRect(contour)
         rectangle = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 3)
         if rectangle.any():
             status = 1
-            
+            cv2.imwrite(f"images/{count}.png", frame)
+            count = count + 1
+            all_images = glob.glob("images/*.png")
+            middle = int(len(all_images) / 2)
+            image_with_object = all_images[middle]
 
     status_list.append(status)
     status_list = status_list[-2:]
 
     if status_list[0] == 1 and status_list[1] == 0:
-        send_email()
+        send_email(image_with_object)
+        clean_folder()
 
     cv2.imshow("Video", frame)
     key = cv2.waitKey(1)
